@@ -72,7 +72,9 @@ else()
 endif()
 
 if(APPLE)
+if(COCOASETUP)
   add_subdirectory(apple)
+endif()
   target_sources(lokinet-platform PRIVATE util/nop_service_manager.cpp)
 endif()
 
@@ -333,7 +335,7 @@ add_library(lokinet-base INTERFACE)
 target_include_directories(lokinet-base
   INTERFACE ${PROJECT_SOURCE_DIR} ${PROJECT_SOURCE_DIR}/include
 )
-target_link_libraries(lokinet-base INTERFACE oxen::logging lokinet-cryptography)
+target_link_libraries(lokinet-base INTERFACE oxen-logging lokinet-cryptography)
 
 if(WITH_PEERSTATS)
   target_compile_definitions(lokinet-base INTERFACE -DLOKINET_PEERSTATS_BACKEND)
@@ -529,7 +531,7 @@ if(WITH_EMBEDDED_LOKINET)
   if(WIN32)
     target_link_libraries(lokinet-shared PUBLIC ws2_32 iphlpapi -fstack-protector)
     install(TARGETS lokinet-shared DESTINATION bin COMPONENT liblokinet)
-  elseif(NOT APPLE)
+  elseif(NOT (APPLE AND COCOASETUP))
     install(TARGETS lokinet-shared LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT liblokinet)
   endif()
 endif()

@@ -1,10 +1,7 @@
+if(APPLE AND COCOASETUP)
 
 # 3.13+ so that we can add link libraries to parent targets
 cmake_minimum_required(VERSION 3.13)
-
-if (BUILD_SHARED_LIBS OR NOT BUILD_STATIC_DEPS OR NOT STATIC_LINK)
-  message(FATAL_ERROR "macOS builds require a full static build; perhaps use the contrib/mac.sh script to build?")
-endif()
 
 # god (steve jobs) made apple so that man may suffer
 find_library(FOUNDATION Foundation REQUIRED)
@@ -60,4 +57,6 @@ if(CODESIGN AND CODESIGN_EXT_PROFILE)
       ${CODESIGN_EXT_PROFILE}
       $<TARGET_BUNDLE_DIR:lokinet-extension>/Contents/embedded.provisionprofile
   )
+endif()
+
 endif()

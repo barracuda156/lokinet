@@ -1,4 +1,4 @@
-if(NOT APPLE)
+if(NOT (APPLE AND COCOASETUP))
   return()
 endif()
 

@@ -3,14 +3,19 @@ cmake_minimum_required(VERSION 3.13...3.24)  # 3.13 is buster's version
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # Has to be set before `project()`, and ignored on non-macos:
-set(CMAKE_OSX_DEPLOYMENT_TARGET 10.15 CACHE STRING "macOS deployment target (Apple clang only)")
+if(APPLE AND CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+    set(CMAKE_OSX_DEPLOYMENT_TARGET 10.15 CACHE STRING "macOS deployment target (Apple clang only)")
+endif()
 
 option(BUILD_DAEMON "build lokinet daemon and associated utils" ON)
-
+option(COCOASETUP "use proprietary Apple interfaces on macOS" ON)
 
 set(LANGS C CXX)
 if(APPLE AND BUILD_DAEMON)
-  set(LANGS ${LANGS} OBJC Swift)
+  set(LANGS ${LANGS} OBJC)
+if(COCOASETUP)
+  set(LANGS ${LANGS} Swift)
+endif()
 endif()
 
 find_program(CCACHE_PROGRAM ccache)
@@ -317,7 +322,7 @@ add_subdirectory(docs)
 
 include(cmake/gui.cmake)
 
-if(APPLE)
+if(APPLE AND COCOASETUP)
   macos_target_setup()
 endif()
 
@@ -332,7 +337,7 @@ if(NOT TARGET uninstall)
     COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake)
 endif()
 
-if(BUILD_PACKAGE AND NOT APPLE)
+if(BUILD_PACKAGE AND NOT (APPLE AND COCOASETUP))
   include(cmake/installer.cmake)
 endif()
 

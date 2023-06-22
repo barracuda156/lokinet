@@ -67,12 +67,6 @@ set(JSON_BuildTests OFF CACHE INTERNAL "")
 set(JSON_Install OFF CACHE INTERNAL "")
 system_or_submodule(NLOHMANN nlohmann_json nlohmann_json>=3.7.0 nlohmann)
 
-if (STATIC OR FORCE_SPDLOG_SUBMODULE OR FORCE_FMT_SUBMODULE)
-    set(OXEN_LOGGING_FORCE_SUBMODULES ON CACHE INTERNAL "")
-endif()
-set(OXEN_LOGGING_SOURCE_ROOT "${PROJECT_SOURCE_DIR}" CACHE INTERNAL "")
-add_subdirectory(oxen-logging)
-
 if(WITH_HIVE)
   add_subdirectory(pybind11 EXCLUDE_FROM_ALL)
 endif()
@@ -95,8 +89,7 @@ target_include_directories(uvw INTERFACE uvw/src)
 target_link_libraries(uvw INTERFACE libuv)
 
 # ngtcp2 needs some massaging to build nicely:
-include(ngtcp2_lib)
-add_ngtcp2_lib()
+add_library(ngtcp2_lib INTERFACE ngtcp2)
 
 # cpr configuration.  Ideally we'd just do this via add_subdirectory, but cpr's cmake requires
 # 3.15+, and we target lower than that (and this is fairly simple to build).
