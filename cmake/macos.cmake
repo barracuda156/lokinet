@@ -1,4 +1,4 @@
-if(NOT APPLE)
+if(NOT APPLE OR (APPLE AND MACOS_LEGACY))
   return()
 endif()
 

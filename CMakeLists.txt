@@ -3,13 +3,15 @@ cmake_minimum_required(VERSION 3.13...3.24)  # 3.13 is buster's version
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # Has to be set before `project()`, and ignored on non-macos:
-set(CMAKE_OSX_DEPLOYMENT_TARGET 10.15 CACHE STRING "macOS deployment target (Apple clang only)")
+if(NOT MACOS_LEGACY)
+  set(CMAKE_OSX_DEPLOYMENT_TARGET 10.15 CACHE STRING "macOS deployment target (Apple clang only)")
+endif()
 
 option(BUILD_DAEMON "build lokinet daemon and associated utils" ON)
 
 
 set(LANGS C CXX)
-if(APPLE AND BUILD_DAEMON)
+if(APPLE AND BUILD_DAEMON AND (NOT MACOS_LEGACY))
   set(LANGS ${LANGS} OBJC Swift)
 endif()
 
@@ -61,6 +63,8 @@ option(BUILD_PACKAGE "builds extra components for making an installer (with 'mak
 option(WITH_BOOTSTRAP "build lokinet-bootstrap tool" ${DEFAULT_WITH_BOOTSTRAP})
 option(WITH_PEERSTATS "build with experimental peerstats db support" OFF)
 option(STRIP_SYMBOLS "strip off all debug symbols into an external archive for all executables built" OFF)
+option(MACOS_DYNAMIC "allow non-static build on macOS, experimental" OFF)
+option(MACOS_LEGACY "compat build for legacy versions of macOS, experimental" OFF)
 
 set(BOOTSTRAP_FALLBACK_MAINNET "${PROJECT_SOURCE_DIR}/contrib/bootstrap/mainnet.signed" CACHE PATH "Fallback bootstrap path (mainnet)")
 set(BOOTSTRAP_FALLBACK_TESTNET "${PROJECT_SOURCE_DIR}/contrib/bootstrap/testnet.signed" CACHE PATH "Fallback bootstrap path (testnet)")
@@ -212,20 +216,18 @@ if (WOW64_CROSS_COMPILE OR WIN64_CROSS_COMPILE)
   include(cmake/cross_compile.cmake)
 endif()
 
-if(NOT APPLE)
-  if(NATIVE_BUILD)
-    if(CMAKE_SYSTEM_PROCESSOR MATCHES "ppc*|power*")
-      add_compile_options(-mcpu=native -mtune=native)
-    else()
-      add_compile_options(-march=native -mtune=native)
-    endif()
-  elseif(NOT NON_PC_TARGET)
-    if (USE_AVX2)
-      add_compile_options(-march=haswell -mtune=haswell -mfpmath=sse)
-    else()
-      # Public binary releases
-      add_compile_options(-march=nocona -mtune=haswell -mfpmath=sse)
-    endif()
+if(NATIVE_BUILD)
+  if(CMAKE_SYSTEM_PROCESSOR MATCHES "ppc*|power*")
+    add_compile_options(-mcpu=native -mtune=native)
+  else()
+    add_compile_options(-march=native -mtune=native)
+  endif()
+elseif(NOT NON_PC_TARGET)
+  if (USE_AVX2)
+    add_compile_options(-march=haswell -mtune=haswell -mfpmath=sse)
+  else()
+    # Public binary releases
+    add_compile_options(-march=nocona -mtune=haswell -mfpmath=sse)
   endif()
 endif()
 
@@ -316,7 +318,7 @@ add_subdirectory(docs)
 
 include(cmake/gui.cmake)
 
-if(APPLE)
+if(APPLE AND NOT MACOS_LEGACY)
   macos_target_setup()
 endif()
 

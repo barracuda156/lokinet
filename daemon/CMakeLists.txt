@@ -1,6 +1,6 @@
 set(exetargets lokinet)
 
-if(APPLE)
+if(APPLE AND NOT MACOS_LEGACY)
   add_executable(lokinet lokinet.swift)
   target_compile_options(lokinet BEFORE PRIVATE -target x86_64-apple-macos${CMAKE_OSX_DEPLOYMENT_TARGET})
 else()
@@ -68,7 +68,7 @@ foreach(exe ${exetargets})
   endif()
   target_include_directories(${exe} PUBLIC "${PROJECT_SOURCE_DIR}")
   if(should_install)
-    if(APPLE)
+    if(APPLE AND NOT MACOS_LEGACY)
       install(TARGETS ${exe}
         BUNDLE DESTINATION "${PROJECT_BINARY_DIR}"
         RUNTIME DESTINATION "."

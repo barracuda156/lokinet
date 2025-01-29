@@ -72,7 +72,9 @@ else()
 endif()
 
 if(APPLE)
-  add_subdirectory(apple)
+  if(NOT MACOS_LEGACY)
+    add_subdirectory(apple)
+  endif()
   target_sources(lokinet-platform PRIVATE util/nop_service_manager.cpp)
 endif()
 

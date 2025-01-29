@@ -2,7 +2,7 @@
 # 3.13+ so that we can add link libraries to parent targets
 cmake_minimum_required(VERSION 3.13)
 
-if (BUILD_SHARED_LIBS OR NOT BUILD_STATIC_DEPS OR NOT STATIC_LINK)
+if ((BUILD_SHARED_LIBS OR NOT BUILD_STATIC_DEPS OR NOT STATIC_LINK) AND NOT MACOS_DYNAMIC)
   message(FATAL_ERROR "macOS builds require a full static build; perhaps use the contrib/mac.sh script to build?")
 endif()
 
@@ -24,7 +24,9 @@ enable_lto(lokinet-extension)
 
 # -fobjc-arc enables automatic reference counting for objective-C code
 # -e _NSExtensionMain because the appex has that instead of a `main` function entry point, of course.
-target_compile_options(lokinet-extension PRIVATE -fobjc-arc)
+if(CMAKE_C_COMPILER_ID MATCHES "Clang")
+  target_compile_options(lokinet-extension PRIVATE -fobjc-arc)
+endif()
 if(MACOS_SYSTEM_EXTENSION)
   target_compile_definitions(lokinet-extension PRIVATE MACOS_SYSTEM_EXTENSION)
   target_compile_definitions(lokinet-util PUBLIC MACOS_SYSTEM_EXTENSION)
